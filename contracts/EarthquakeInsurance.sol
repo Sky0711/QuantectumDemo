@@ -8,7 +8,7 @@ import "./EarthquakeInsuranceDS.sol";
 /**
  * @title EarthquakeInsurance
  * @dev The contract manages earthquake insurance policies and payouts.
- *      It allows users to buy policies and claim payouts if their zone is affected by an earthquake.
+ *      It allows users to buy policies and claim payouts if their location/zone is affected by an earthquake.
  */
 contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeInsuranceDS {
 
@@ -57,13 +57,13 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
      * @notice Allows an oracle or other trusted source to set a zone as affected by an earthquake.
      * @param _zone The zone to be marked as affected.
      */
-    function setAffectedZone(string memory _zone) public {
+    function setAffectedZone(string memory _zone) public onlyOwner(){
         // Mark the zone as affected
         affectedZones[_zone] = true;
     }
 
     /**
-     * @notice Allows a policy holder to claim a payout.
+     * @notice Allows a policy holder to claim a payout if his location/zone is affected by an Eartquake.
      */
     function claimPayout() public {
         // Ensure the policy holder has an active policy
