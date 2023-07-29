@@ -1,6 +1,6 @@
 # Earthquake Insurance Demo
 
-This project demonstrates the implementation of an earthquake insurance policy using Ethereum smart contracts. It includes a sample contract, tests for the contract, and a script for deploying the contract.
+Short demo code showcasing minimal implementation of an earthquake insurance policy on EVM based smart contracts. 
 
 ## Prerequisites
 
@@ -8,6 +8,8 @@ This project demonstrates the implementation of an earthquake insurance policy u
 - npm (v6.14.13 or later)
 
 ## Installation
+
+**Note:** Please replace `yourusername` with your actual GitHub username in the `git clone` command.
 
 1. Clone the repository to your local machine:
     ```
@@ -46,3 +48,8 @@ Here are some commands you can run to interact with the project:
 ## License
 
 This project is licensed under the MIT License.
+
+
+
+
+
