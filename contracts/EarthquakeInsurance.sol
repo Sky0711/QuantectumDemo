@@ -34,7 +34,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
      * @param _coverageAmount The amount of coverage for the policy.
      * @param _zone The zone where the policy holder is located.
      */
-    function buyPolicy(uint256 _coverageAmount, string memory _zone) public payable {
+    function buyPolicy(uint256 _coverageAmount, string memory _zone) external payable {
         // Ensure the policy cost is greater than 0
         require(msg.value > 0, "Policy cost must be greater than 0");
 
@@ -57,7 +57,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
      * @notice Allows an oracle or other trusted source to set a zone as affected by an earthquake.
      * @param _zone The zone to be marked as affected.
      */
-    function setAffectedZone(string memory _zone) public onlyOwner(){
+    function setAffectedZone(string memory _zone) external onlyOwner(){
         // Mark the zone as affected
         affectedZones[_zone] = true;
     }
@@ -65,12 +65,12 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
     /**
      * @notice Allows a policy holder to claim a payout if his location/zone is affected by an Eartquake.
      */
-    function claimPayout() public {
+    function claimPayout() external {
         // Ensure the policy holder has an active policy
         require(policies[msg.sender].isActive == true, "No active policy for this address");
 
         // Ensure the policy holder's zone is affected by an earthquake
-        require(affectedZones[policies[msg.sender].zone] == true, "This policy is not within the affected area");
+        require(affectedZones[policies[msg.sender].zone] == true, "Insurance holder is not within the affected area");
 
         // Calculate the payout amount
         uint256 payoutAmount = policies[msg.sender].coverageAmount;
