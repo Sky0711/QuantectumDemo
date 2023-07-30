@@ -7,8 +7,9 @@ import "./EarthquakeInsuranceDS.sol";
 
 /**
  * @title EarthquakeInsurance
- * @dev The contract manages earthquake insurance policies and payouts.
- *      It allows users to buy policies and claim payouts if their location/zone is affected by an earthquake.
+ * @dev The contract manages Insurance policies and payouts.
+ *      It allows users to buy policies and claim payouts if
+ *      their location/zone is affected by an earthquake.
  */
 contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeInsuranceDS {
 
@@ -27,7 +28,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
     //////////////////////////// Events ////////////////////////////////////////
     // TODO: Define events to be emitted by the contract
 
-    //////////////////////////// Main Functionalities ////////////////////////////////////////
+    //////////////////////////// Main Functionalities //////////////////////////
 
     /**
      * @notice Allows a policy holder to buy a policy.
@@ -39,7 +40,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
         require(msg.value > 0, "Policy cost must be greater than 0");
 
         // Ensure the policy holder doesn't already have an active policy
-        require(policies[msg.sender].isActive == false, "Policy already exists for this address");
+        require(policies[msg.sender].isActive == false, "This address already has active Insurance policy");
 
         // Ensure the zone is not currently affected by an earthquake
         require(affectedZones[_zone] == false, "This zone is currently affected by an earthquake");
@@ -54,7 +55,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
     }
 
     /**
-     * @notice Allows an oracle or other trusted source to set a zone as affected by an earthquake.
+     * @notice Allows an Oracle or other trusted source to set a zone as affected by an earthquake.
      * @param _zone The zone to be marked as affected.
      */
     function setAffectedZone(string memory _zone) external onlyOwner(){
@@ -67,7 +68,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
      */
     function claimPayout() external {
         // Ensure the policy holder has an active policy
-        require(policies[msg.sender].isActive == true, "No active policy for this address");
+        require(policies[msg.sender].isActive == true, "No active Insurance policy for this address");
 
         // Ensure the policy holder's zone is affected by an earthquake
         require(affectedZones[policies[msg.sender].zone] == true, "Insurance holder is not within the affected area");

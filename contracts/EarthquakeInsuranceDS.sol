@@ -15,9 +15,9 @@ abstract contract EarthquakeInsuranceDS {
         string zone;              // Geographical zone where the policy holder is located
     }
 
-    // Mapping tracking earthquake-affected zones (zone => isAffected)
+    // Tracking earthquake-affected Geografical zones (zone => isAffected)
     mapping(string => bool) public affectedZones;
 
-    // Mapping storing insurance policies for each policy holder (policyHolder => Policy)
+    // Storing insurance policies for each policy holder (policyHolder => Policy)
     mapping(address => Policy) public policies;
 }
