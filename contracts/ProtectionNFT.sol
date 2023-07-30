@@ -13,34 +13,75 @@ import "./ProtectionNFT_DS.sol";
 contract ProtectionNFT is UUPSUpgradeable, ERC721Upgradeable, AccessControlUpgradeable, ProtectionNFT_DS {
     //////////////////////////// UUPS Functionalities ////////////////////////////////////////
     ///@dev No constructor in upgradable contracts. Instead we have initializers
-    function initialize(string memory _name, string memory _symbol) public initializer {
-        __ERC721_init(_name, _symbol);
+    function initialize() public initializer {
+        __ERC721_init("ProtectionNFT", "PNFT");
 
         // Grant the contract deployer the DEFAULT_ADMIN_ROLE
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
+    // Setting address for EarthquakeInsurance contract
+    function setEarthquakeInsurance( address contractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        EarthquakeInsurance = contractAddress;
+
+        // Granting VALID_CONTRACT role to EarthquakeInsurance smart contract,
+        // allowing it to mint and burn NFTs.
+        _grantRole(VALID_CONTRACT, contractAddress);
+    }
+
     ///@dev Required by the OZ UUPS module (Only contract owner can initiate upgrade)
     function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
+        // Returns the Implementation Version
+    function version() public pure returns (string memory) { return "ProtectionNFT: 0.1.0 Demo"; }
+
     ////////// Counter utility library ////////////////////////
     using CountersUpgradeable for CountersUpgradeable.Counter; 
-    
+
     //////////////////////////// Events ////////////////////////////////////////
     // TODO: Define events to be emitted by the contract
 
     //////////////////////////// Main Functionalities ////////////////////////////////////////
 
     /**
-     * @notice Mint a new ProtectionNFT.
-     * @dev Only accounts with the DEFAULT_ADMIN_ROLE can mint new tokens.
-     * @param recipient The address to receive the newly minted token.
-     */
-    function mintProtectionNFT(address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    * @notice Mint a new ProtectionNFT.
+    * @dev Only VALID_CONTRACT can mint new tokens.
+    * @param _policy The policy details.
+    */
+    function mintProtectionNFT(InsurancePolicy memory _policy)
+    external onlyRole(VALID_CONTRACT) returns (uint){
+        // Get tokenId
         _tokenIdTracker.increment();
-        _mint(recipient, _tokenIdTracker.current());
+        uint256 tokenId = _tokenIdTracker.current();
+
+        // Mint ProtectionNFT
+        _mint(_policy.policyHolder, tokenId);
+        nftDetails[tokenId] = _policy;
     }
 
+    /**
+    * @notice Retrieve the insurance policy details of a given NFT.
+    * @dev Only an entity with the VALID_CONTRACT role can call this function.
+    * @param tokenId The ID of the NFT.
+    * @return The insurance policy associated with the NFT.
+    */
+    function getNftProperties(uint tokenId) external view onlyRole(VALID_CONTRACT) returns(InsurancePolicy memory){
+        return nftDetails[tokenId];
+    }
+
+    /**
+    * @notice Burn a given NFT and delete its associated insurance policy.
+    * @dev Only an entity with the VALID_CONTRACT role can call this function. The caller must also be the NFT owner or an approved address.
+    * @param tokenId The ID of the NFT to be burned.
+    */
+    function burnNFT(uint256 tokenId) external onlyRole(VALID_CONTRACT) {
+        // Check that the message sender is the owner of the token
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not owner nor approved");
+
+        // Deletes the NFT and associated InsurancePolicy
+        _burn(tokenId);
+        delete nftDetails[tokenId];
+    }
     /**
      * ERC165 proxy method.
      *

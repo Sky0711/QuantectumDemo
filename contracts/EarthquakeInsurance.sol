@@ -4,6 +4,7 @@ pragma solidity 0.8.3;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./EarthquakeInsuranceDS.sol";
+import "./ProtectionNFT.sol";
 
 /**
  * @title EarthquakeInsurance
@@ -15,8 +16,11 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
 
     //////////////////////////// UUPS Functionalities  ////////////////////////////////////////
     // No constructor in upgradable contracts. Instead we have initializers
-    function initialize() public initializer {
+    function initialize(address _protectionNFTAddress) public initializer {
         __Ownable_init();
+        
+        // Setting address ProtectionNFT contract
+        protectionNFT = ProtectionNFT(_protectionNFTAddress);
     }
 
     // Required by the OZ UUPS module (only owner is able to upgrade contract)
@@ -31,27 +35,41 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
     //////////////////////////// Main Functionalities //////////////////////////
 
     /**
-     * @notice Allows a policy holder to buy a policy.
-     * @param _coverageAmount The amount of coverage for the policy.
-     * @param _zone The zone where the policy holder is located.
-     */
-    function buyPolicy(uint256 _coverageAmount, string memory _zone) external payable {
-        // Ensure the policy cost is greater than 0
+    * @notice Allows a policy holder to buy a policy.
+    * @param _zone The zone where the policy holder is located.
+    */
+    function buyPolicy(string memory _zone) external payable returns(uint tokenId) {
+        // Conditions checks
         require(msg.value > 0, "Policy cost must be greater than 0");
-
-        // Ensure the policy holder doesn't already have an active policy
-        require(policies[msg.sender].isActive == false, "This address already has active Insurance policy");
-
-        // Ensure the zone is not currently affected by an earthquake
         require(affectedZones[_zone] == false, "This zone is currently affected by an earthquake");
 
-        // Create the policy and store it in the mapping
-        policies[msg.sender] = Policy({
+        // Calculate the coverage amount
+        uint256 coverageAmount = calculateCoverage(msg.value, _zone);
+
+        // Create the coresponding Insurance policy
+        InsurancePolicy memory policy = InsurancePolicy({
             policyHolder: msg.sender,
-            coverageAmount: _coverageAmount,
-            isActive: true,
+            coverageAmount: coverageAmount,
             zone: _zone
         });
+
+        // After creating the policy, mint a new ProtectionNFT for the policy holder
+        tokenId = protectionNFT.mintProtectionNFT(policy);
+    }
+
+    /**
+    * @notice Calculate coverage amount based on the amount paid and zone risk.
+    * @param _amountPaid The amount paid by the policy holder.
+    * _zone Geografical location where the policy holder is located.
+    * @return coverageAmount equals payout for those affected.
+    */
+    function calculateCoverage(uint256 _amountPaid, string memory /*_zone*/)
+    public pure returns (uint256) {
+        // TODO: Here we would use some algorithm for riskAssesment
+        // WIll use simple zoneRiskFactor = 1 for the DEMO
+        uint zoneRiskFactor = 1;
+        uint256 coverageAmount = _amountPaid * zoneRiskFactor;
+        return coverageAmount;
     }
 
     /**
@@ -59,28 +77,28 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
      * @param _zone The zone to be marked as affected.
      */
     function setAffectedZone(string memory _zone) external onlyOwner(){
-        // Mark the zone as affected
+        // Mark the specified zone as affected by an earthquake
         affectedZones[_zone] = true;
     }
 
     /**
-     * @notice Allows a policy holder to claim a payout if his location/zone is affected by an Eartquake.
+     * @notice Allows a policy holder to claim a payout if his location/zone is affected by an Earthquake.
+     * @param _nftId The ID of the NFT that represents the policy.
      */
-    function claimPayout() external {
-        // Ensure the policy holder has an active policy
-        require(policies[msg.sender].isActive == true, "No active Insurance policy for this address");
+    function claimPayout(uint256 _nftId) external {
+        // Fetch the properties of the NFT
+        InsurancePolicy memory policy = protectionNFT.getNftProperties(_nftId);
 
-        // Ensure the policy holder's zone is affected by an earthquake
-        require(affectedZones[policies[msg.sender].zone] == true, "Insurance holder is not within the affected area");
+        // Conditions checks
+        require(policy.policyHolder == msg.sender, "Caller is not the holder of this policy");
+        require(affectedZones[policy.zone] == true, "Policy holder is not within the affected area");
 
-        // Calculate the payout amount
-        uint256 payoutAmount = policies[msg.sender].coverageAmount;
-
-        // Set the policy's coverage amount to 0 and mark it as inactive
-        policies[msg.sender].coverageAmount = 0;
-        policies[msg.sender].isActive = false;
+        // Remove Insurance Policy that was paied out
+        protectionNFT.burnNFT(_nftId);
 
         // Transfer the payout amount to the policy holder
-        payable(msg.sender).transfer(payoutAmount);
+        payable(msg.sender).transfer(policy.coverageAmount);
     }
+
+
 }
