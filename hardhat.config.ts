@@ -5,7 +5,15 @@ import "@nomicfoundation/hardhat-toolbox";
 import '@openzeppelin/hardhat-upgrades';
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.3",
+  solidity: {
+    version: "0.8.3",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 2**32-1,     // (2**32-1) Optimized for SmartContract usage, not deployment cost.
+      },
+    },
+  },
 };
 
 export default config;
