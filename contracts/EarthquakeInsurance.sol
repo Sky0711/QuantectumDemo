@@ -93,7 +93,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
         require(affectedZones[policy.zone] == true, "Not within the affected area");
 
         // Remove Insurance Policy that was paied out
-        protectionNFT.burnNFT(_nftId);
+        protectionNFT.burnNFT(msg.sender, _nftId);
 
         // Transfer the payout amount to the policy holder
         payable(msg.sender).transfer(policy.coverageAmount);

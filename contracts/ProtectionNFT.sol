@@ -76,9 +76,9 @@ contract ProtectionNFT is UUPSUpgradeable, ERC721Upgradeable, AccessControlUpgra
     * @dev Only an entity with the VALID_CONTRACT role can call this function. The caller must also be the NFT owner or an approved address.
     * @param tokenId The ID of the NFT to be burned.
     */
-    function burnNFT(uint256 tokenId) external onlyRole(VALID_CONTRACT) {
+    function burnNFT(address owner, uint256 tokenId) external onlyRole(VALID_CONTRACT) {
         // Check that the message sender is the owner of the token
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not owner nor approved");
+        require(_isApprovedOrOwner(owner, tokenId), "Caller is not owner or approved");
 
         // Deletes the NFT and associated InsurancePolicy
         _burn(tokenId);
