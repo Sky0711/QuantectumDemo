@@ -89,8 +89,8 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
         InsurancePolicy memory policy = protectionNFT.getNftProperties(_nftId);
 
         // Conditions checks
-        require(protectionNFT.ownerOf(_nftId) == msg.sender, "Caller is not the holder of this policy");
-        require(affectedZones[policy.zone] == true, "Policy holder is not within the affected area");
+        require(protectionNFT.ownerOf(_nftId) == msg.sender, "Not the holder of this policy");
+        require(affectedZones[policy.zone] == true, "Not within the affected area");
 
         // Remove Insurance Policy that was paied out
         protectionNFT.burnNFT(_nftId);
