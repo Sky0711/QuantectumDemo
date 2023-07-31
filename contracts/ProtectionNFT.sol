@@ -48,14 +48,14 @@ contract ProtectionNFT is UUPSUpgradeable, ERC721Upgradeable, AccessControlUpgra
     * @dev Only VALID_CONTRACT can mint new tokens.
     * @param _policy The policy details.
     */
-    function mintProtectionNFT(InsurancePolicy memory _policy)
+    function mintProtectionNFT(address recipient, InsurancePolicy memory _policy)
     external onlyRole(VALID_CONTRACT) returns (uint){
         // Get tokenId
         _tokenIdTracker.increment();
         uint256 tokenId = _tokenIdTracker.current();
 
         // Mint ProtectionNFT
-        _mint(_policy.policyHolder, tokenId);
+        _mint(recipient, tokenId);
         nftDetails[tokenId] = _policy;
     }
 

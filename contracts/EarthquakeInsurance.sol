@@ -48,13 +48,12 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
 
         // Create the coresponding Insurance policy
         InsurancePolicy memory policy = InsurancePolicy({
-            policyHolder: msg.sender,
             coverageAmount: coverageAmount,
             zone: _zone
         });
 
         // After creating the policy, mint a new ProtectionNFT for the policy holder
-        tokenId = protectionNFT.mintProtectionNFT(policy);
+        tokenId = protectionNFT.mintProtectionNFT(msg.sender, policy);
     }
 
     /**
@@ -90,7 +89,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
         InsurancePolicy memory policy = protectionNFT.getNftProperties(_nftId);
 
         // Conditions checks
-        require(policy.policyHolder == msg.sender, "Caller is not the holder of this policy");
+        require(protectionNFT.ownerOf(_nftId) == msg.sender, "Caller is not the holder of this policy");
         require(affectedZones[policy.zone] == true, "Policy holder is not within the affected area");
 
         // Remove Insurance Policy that was paied out
