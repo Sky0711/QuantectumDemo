@@ -57,6 +57,8 @@ contract ProtectionNFT is UUPSUpgradeable, ERC721Upgradeable, AccessControlUpgra
         // Mint ProtectionNFT
         _mint(recipient, tokenId);
         nftDetails[tokenId] = _policy;
+
+        return tokenId;
     }
 
     /**

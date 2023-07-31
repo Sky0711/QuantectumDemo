@@ -38,7 +38,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
     * @notice Allows a policy holder to buy a policy.
     * @param _zone The zone where the policy holder is located.
     */
-    function buyPolicy(string memory _zone) external payable returns(uint tokenId) {
+    function buyPolicy(string memory _zone) external payable {
         // Conditions checks
         require(msg.value > 0, "Policy cost must be greater than 0");
         require(affectedZones[_zone] == false, "This zone is currently affected by an earthquake");
@@ -53,7 +53,7 @@ contract EarthquakeInsurance is UUPSUpgradeable, OwnableUpgradeable, EarthquakeI
         });
 
         // After creating the policy, mint a new ProtectionNFT for the policy holder
-        tokenId = protectionNFT.mintProtectionNFT(msg.sender, policy);
+        protectionNFT.mintProtectionNFT(msg.sender, policy);
     }
 
     /**
